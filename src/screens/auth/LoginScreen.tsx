@@ -14,13 +14,36 @@ import { Header } from "../../components/ui/Header";
 import { Input } from "../../components/ui/Input";
 import { colors } from "../../constants/colors";
 import { spacing } from "../../constants/spacing";
+import { signIn } from "../../services/auth";
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = () => {
-    console.log("Login submitted", { email, password });
+  const handleLogin = async () => {
+    setError(null);
+
+    // Validate inputs
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signIn({ email, password });
+      console.log("Login successful", result);
+      // TODO: Handle successful login - navigate to app flow
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      console.error("Login error:", message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignup = () => {
@@ -38,21 +61,33 @@ export const LoginScreen = () => {
           subtitle="Log in to keep your productivity streak moving forward."
         />
         <View style={styles.form}>
+          {error && <Text style={styles.errorText}>{error}</Text>}
           <Input
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!loading}
           />
           <Input
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            editable={!loading}
           />
-          <Button title="Login" onPress={handleLogin} />
-          <Pressable onPress={handleSignup} style={styles.signupLink}>
+          <Button
+            title="Login"
+            onPress={handleLogin}
+            loading={loading}
+            disabled={loading}
+          />
+          <Pressable
+            onPress={handleSignup}
+            style={styles.signupLink}
+            disabled={loading}
+          >
             <Text style={styles.signupText}>
               Don't have an account? Sign up
             </Text>
@@ -69,6 +104,12 @@ const styles = StyleSheet.create({
   },
   form: {
     marginTop: spacing.lg,
+  },
+  errorText: {
+    color: colors.error || "#e53e3e",
+    marginBottom: spacing.md,
+    textAlign: "center",
+    fontSize: 14,
   },
   signupLink: {
     marginTop: spacing.md,

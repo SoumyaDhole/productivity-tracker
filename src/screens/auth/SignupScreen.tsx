@@ -14,15 +14,48 @@ import { Header } from "../../components/ui/Header";
 import { Input } from "../../components/ui/Input";
 import { colors } from "../../constants/colors";
 import { spacing } from "../../constants/spacing";
+import { signUp } from "../../services/auth";
 
 export const SignupScreen = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = () => {
-    console.log("Signup submitted", { name, email, password, confirmPassword });
+  const handleSignup = async () => {
+    setError(null);
+
+    // Validate inputs
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signUp({ email, password });
+      console.log("Signup successful", result);
+      // TODO: Handle successful signup - navigate to app flow or login
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Signup failed";
+      setError(message);
+      console.error("Signup error:", message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = () => {
@@ -40,28 +73,46 @@ export const SignupScreen = () => {
           subtitle="Start building stronger productivity habits with a quick setup."
         />
         <View style={styles.form}>
-          <Input placeholder="Full name" value={name} onChangeText={setName} />
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          <Input
+            placeholder="Full name"
+            value={name}
+            onChangeText={setName}
+            editable={!loading}
+          />
           <Input
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!loading}
           />
           <Input
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            editable={!loading}
           />
           <Input
             placeholder="Confirm password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
+            editable={!loading}
           />
-          <Button title="Sign Up" onPress={handleSignup} />
-          <Pressable onPress={handleLogin} style={styles.loginLink}>
+          <Button
+            title="Sign Up"
+            onPress={handleSignup}
+            loading={loading}
+            disabled={loading}
+          />
+          <Pressable
+            onPress={handleLogin}
+            style={styles.loginLink}
+            disabled={loading}
+          >
             <Text style={styles.loginText}>Already have an account? Login</Text>
           </Pressable>
         </View>
@@ -76,6 +127,12 @@ const styles = StyleSheet.create({
   },
   form: {
     marginTop: spacing.lg,
+  },
+  errorText: {
+    color: colors.error || "#e53e3e",
+    marginBottom: spacing.md,
+    textAlign: "center",
+    fontSize: 14,
   },
   loginLink: {
     marginTop: spacing.md,
