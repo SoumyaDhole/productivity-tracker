@@ -1,15 +1,13 @@
-import type { RelativePathString } from "expo-router";
-
 export const AuthRoutes: Readonly<{
-  Welcome: RelativePathString;
-  Login: RelativePathString;
-  Signup: RelativePathString;
-  Onboarding: RelativePathString;
+  Welcome: string;
+  Login: string;
+  Signup: string;
+  Onboarding: string;
 }> = {
-  Welcome: "..",
-  Login: "./login",
-  Signup: "./signup",
-  Onboarding: "./onboarding",
+  Welcome: "/auth/index",
+  Login: "/auth/login",
+  Signup: "/auth/signup",
+  Onboarding: "/auth/onboarding",
 } as const;
 
 export type AuthRouteName = keyof typeof AuthRoutes;

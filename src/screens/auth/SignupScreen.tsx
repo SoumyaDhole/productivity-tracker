@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -14,10 +14,8 @@ import { Header } from "../../components/ui/Header";
 import { Input } from "../../components/ui/Input";
 import { colors } from "../../constants/colors";
 import { spacing } from "../../constants/spacing";
-import { AuthRoutes } from "../../navigation/AuthNavigator";
 
 export const SignupScreen = () => {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +26,7 @@ export const SignupScreen = () => {
   };
 
   const handleLogin = () => {
-    router.push({ pathname: AuthRoutes.Login });
+    router.push("/auth/login");
   };
 
   return (

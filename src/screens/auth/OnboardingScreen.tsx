@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ScreenContainer } from "../../components/layout/ScreenContainer";
@@ -6,7 +6,6 @@ import { Button } from "../../components/ui/Button";
 import { colors } from "../../constants/colors";
 import { spacing } from "../../constants/spacing";
 import { typography } from "../../constants/typography";
-import { AuthRoutes } from "../../navigation/AuthNavigator";
 
 const features = [
   "Track daily habits and review progress",
@@ -15,10 +14,8 @@ const features = [
 ];
 
 export const OnboardingScreen = () => {
-  const router = useRouter();
-
   const handleContinue = () => {
-    router.push({ pathname: AuthRoutes.Welcome });
+    router.push("/auth/login");
   };
 
   return (
