@@ -1,9 +1,5 @@
-import { SafeAreaView, Text } from "react-native";
+import { WelcomeScreen } from "@/src/screens/auth/WelcomeScreen";
 
-export default function HomeScreen() {
-  return (
-    <SafeAreaView>
-      <Text>Productivity Tracker</Text>
-    </SafeAreaView>
-  );
+export default function Home() {
+  return <WelcomeScreen />;
 }
