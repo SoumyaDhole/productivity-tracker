@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenContainer } from "../../components/layout/ScreenContainer";
@@ -8,12 +8,14 @@ import { spacing } from "../../constants/spacing";
 import { typography } from "../../constants/typography";
 
 export const WelcomeScreen = () => {
+  const router = useRouter();
+
   const handleGetStarted = () => {
-    router.push("/auth/onboarding");
+    router.replace("/auth/onboarding");
   };
 
   const handleLogin = () => {
-    router.push("/auth/login");
+    router.replace("/auth/login");
   };
 
   return (

@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -17,6 +17,7 @@ import { spacing } from "../../constants/spacing";
 import { signUp } from "../../services/auth";
 
 export const SignupScreen = () => {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +49,7 @@ export const SignupScreen = () => {
     try {
       const result = await signUp({ email, password });
       console.log("Signup successful", result);
-      // TODO: Handle successful signup - navigate to app flow or login
+      // Auth layout will redirect once the Supabase session is restored.
     } catch (err) {
       const message = err instanceof Error ? err.message : "Signup failed";
       setError(message);
@@ -59,7 +60,7 @@ export const SignupScreen = () => {
   };
 
   const handleLogin = () => {
-    router.push("/auth/login");
+    router.replace("/auth/login");
   };
 
   return (

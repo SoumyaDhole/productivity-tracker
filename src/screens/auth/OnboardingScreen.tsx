@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ScreenContainer } from "../../components/layout/ScreenContainer";
@@ -14,8 +14,10 @@ const features = [
 ];
 
 export const OnboardingScreen = () => {
+  const router = useRouter();
+
   const handleContinue = () => {
-    router.push("/auth/login");
+    router.replace("/auth/login");
   };
 
   return (

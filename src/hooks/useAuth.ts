@@ -1,16 +1,3 @@
-import { useEffect, useState } from "react";
+import { useAuth as useAuthContext } from "../contexts/AuthContext";
 
-const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Placeholder for auth state checks.
-    setIsAuthenticated(false);
-  }, []);
-
-  return {
-    isAuthenticated,
-  };
-};
-
-export default useAuth;
+export const useAuth = useAuthContext;

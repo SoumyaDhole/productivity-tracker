@@ -1,13 +1,26 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { Button } from "../../components/ui/Button";
+import { useAuth } from "../../hooks/useAuth";
 
 const ProfileScreen = () => {
+  const { signOut, user } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace("/auth");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile Screen</Text>
       <Text style={styles.body}>
         Manage your profile, settings, and personal productivity stats.
       </Text>
+      {user && <Text style={styles.email}>Logged in as: {user.email}</Text>}
+      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 };
@@ -28,6 +41,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+    marginBottom: 20,
+  },
+  email: {
+    fontSize: 16,
+    marginBottom: 20,
   },
 });
 

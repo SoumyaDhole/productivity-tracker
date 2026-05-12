@@ -1,15 +1,15 @@
-import { Tabs, useRouter } from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useAuth } from "../../src/contexts/AuthContext";
 
-export default function TabLayout() {
+export default function AuthLayout() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.replace("/auth");
+    if (!loading && isAuthenticated) {
+      router.replace("/");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -22,9 +22,5 @@ export default function TabLayout() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect
-  }
-
-  return <Tabs screenOptions={{ headerShown: false }} />;
+  return <Slot />;
 }
