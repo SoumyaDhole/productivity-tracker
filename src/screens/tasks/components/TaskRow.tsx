@@ -1,8 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   subtitle: string;
@@ -13,19 +19,51 @@ interface Task {
 interface TaskRowProps {
   task: Task;
   isLast?: boolean;
+  onToggle?: (task: Task) => void;
+  onLongPress?: (task: Task) => void;
+  disabled?: boolean;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, isLast = false }) => {
-  const priorityStyles = {
-    High: { backgroundColor: "#450A0A", color: "#FCA5A5" },
-    Med: { backgroundColor: "#451A03", color: "#FCD34D" },
-    Low: { backgroundColor: "#1A3A20", color: "#86EFAC" },
-    Done: { backgroundColor: "#14532D", color: "#86EFAC" },
-  };
+const priorityStyles: Record<
+  Task["priority"],
+  { backgroundColor: string; color: string }
+> = {
+  High: { backgroundColor: "#450A0A", color: "#FCA5A5" },
+  Med: { backgroundColor: "#451A03", color: "#FCD34D" },
+  Low: { backgroundColor: "#1A3A20", color: "#86EFAC" },
+  Done: { backgroundColor: "#14532D", color: "#86EFAC" },
+};
+
+const TaskRow: React.FC<TaskRowProps> = ({
+  task,
+  isLast = false,
+  onToggle,
+  onLongPress,
+  disabled = false,
+}) => {
+  const ps = priorityStyles[task.priority];
 
   return (
-    <View style={[styles.row, !isLast && styles.border]}>
-      <TouchableOpacity style={styles.checkbox}>
+    <Pressable
+      style={[styles.row, !isLast && styles.border]}
+      onLongPress={() => {
+        if (!disabled) {
+          onLongPress?.(task);
+        }
+      }}
+      delayLongPress={380}
+    >
+      <TouchableOpacity
+        style={[styles.checkbox, disabled && styles.dimmed]}
+        onPress={() => {
+          if (!disabled) {
+            onToggle?.(task);
+          }
+        }}
+        disabled={disabled}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: task.completed, disabled }}
+      >
         {task.completed ? (
           <View style={styles.checkedBox}>
             <Ionicons name="checkmark" size={10} color="#FFFFFF" />
@@ -40,22 +78,12 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, isLast = false }) => {
         </Text>
         <Text style={styles.subtitle}>{task.subtitle}</Text>
       </View>
-      <View
-        style={[
-          styles.priorityPill,
-          { backgroundColor: priorityStyles[task.priority].backgroundColor },
-        ]}
-      >
-        <Text
-          style={[
-            styles.priorityText,
-            { color: priorityStyles[task.priority].color },
-          ]}
-        >
+      <View style={[styles.priorityPill, { backgroundColor: ps.backgroundColor }]}>
+        <Text style={[styles.priorityText, { color: ps.color }]}>
           {task.priority}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
@@ -69,6 +97,9 @@ const styles = StyleSheet.create({
   border: {
     borderBottomWidth: 0.5,
     borderColor: "#1E1E2A",
+  },
+  dimmed: {
+    opacity: 0.45,
   },
   checkbox: {
     width: 20,
@@ -119,4 +150,3 @@ const styles = StyleSheet.create({
 });
 
 export default TaskRow;
-export type { Task };

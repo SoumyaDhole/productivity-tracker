@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { darkColors } from "../../../constants/colors";
 import TaskRow from "./TaskRow";
@@ -59,6 +59,10 @@ const TasksCard: React.FC<TasksCardProps> = ({
   onSeeAll,
 }) => {
   const [localTasks, setLocalTasks] = useState(tasks);
+
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
 
   const handleToggle = (id: string) => {
     setLocalTasks((prev) =>

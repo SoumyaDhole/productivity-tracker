@@ -1,6 +1,10 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -8,136 +12,284 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import type { TaskInsert } from "@/src/types/database";
+import { useAuth } from "../../hooks/useAuth";
+import { useTaskStore } from "../../store/useTaskStore";
+import {
+  localTodayYmd,
+  mondaySundayOfWeekContaining,
+} from "../../utils/dateYmd";
+import AddTaskSheet from "./components/AddTaskSheet";
 import FilterPills from "./components/FilterPills";
 import GoalGroup from "./components/GoalGroup";
+import type { Task } from "./components/TaskRow";
+import {
+  buildGoalSections,
+  filterTasksForList,
+  type TaskListFilter,
+} from "./utils/buildTaskGoalGroups";
+
+const FILTER_OPTIONS: TaskListFilter[] = [
+  "Today",
+  "This Week",
+  "All",
+  "Done",
+];
 
 const TasksScreen: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState("Today");
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  const filterOptions = ["Today", "This Week", "All", "Done"];
+  const goals = useTaskStore((s) => s.goals);
+  const tasks = useTaskStore((s) => s.tasks);
+  const loading = useTaskStore((s) => s.loading);
+  const error = useTaskStore((s) => s.error);
 
-  const goalGroups = [
-    {
-      goalName: "DSA Prep",
-      dotColor: "#7C3AED",
-      progress: "2/3 done",
-      tasks: [
-        {
-          id: "1",
-          title: "Solve array problems",
-          subtitle: "Due 12pm",
-          priority: "Done" as const,
-          completed: true,
-        },
-        {
-          id: "2",
-          title: "Watch binary search video",
-          subtitle: "Due 2pm",
-          priority: "Done" as const,
-          completed: true,
-        },
-        {
-          id: "3",
-          title: "Solve 3 LeetCode mediums",
-          subtitle: "Due 6pm",
-          priority: "High" as const,
-          completed: false,
-        },
-      ],
+  const [activeFilter, setActiveFilter] = useState<TaskListFilter>("Today");
+  const [refreshing, setRefreshing] = useState(false);
+  const [addVisible, setAddVisible] = useState(false);
+  const [pendingToggleIds, setPendingToggleIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+
+  const hasLoadedRef = useRef(false);
+  const lastUserIdRef = useRef<string | undefined>(undefined);
+
+  const todayYmd = localTodayYmd();
+  const { mon: weekMon, sun: weekSun } =
+    mondaySundayOfWeekContaining(new Date());
+
+  const bootstrapTasks = useCallback(
+    async (opts: { silent?: boolean }) => {
+      if (!userId) {
+        return;
+      }
+      const silent = opts.silent ?? false;
+      if (silent) {
+        await useTaskStore
+          .getState()
+          .refreshTaskData(userId, undefined, { showLoading: false });
+      } else {
+        await useTaskStore.getState().refreshTaskData(userId);
+      }
     },
-    {
-      goalName: "App Dev",
-      dotColor: "#10B981",
-      progress: "0/3 done",
-      tasks: [
-        {
-          id: "4",
-          title: "Build dashboard screen",
-          subtitle: "Due 5pm",
-          priority: "High" as const,
-          completed: false,
-        },
-        {
-          id: "5",
-          title: "Write Supabase schema",
-          subtitle: "Due 7pm",
-          priority: "Med" as const,
-          completed: false,
-        },
-        {
-          id: "6",
-          title: "Push code to GitHub",
-          subtitle: "Due 10pm",
-          priority: "Low" as const,
-          completed: false,
-        },
-      ],
+    [userId],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) {
+        lastUserIdRef.current = undefined;
+        hasLoadedRef.current = false;
+        return undefined;
+      }
+      if (lastUserIdRef.current !== userId) {
+        hasLoadedRef.current = false;
+        lastUserIdRef.current = userId;
+      }
+      const silent = hasLoadedRef.current;
+      const ac = new AbortController();
+      void (async () => {
+        await bootstrapTasks({ silent });
+        if (!ac.signal.aborted) {
+          hasLoadedRef.current = true;
+        }
+      })();
+      return () => {
+        ac.abort();
+      };
+    }, [userId, bootstrapTasks]),
+  );
+
+  const filteredTasks = useMemo(
+    () =>
+      filterTasksForList(tasks, activeFilter, todayYmd, weekMon, weekSun),
+    [tasks, activeFilter, todayYmd, weekMon, weekSun],
+  );
+
+  const goalSections = useMemo(
+    () => buildGoalSections(goals, filteredTasks),
+    [goals, filteredTasks],
+  );
+
+  const showBlockingLoader =
+    Boolean(userId) && loading && tasks.length === 0 && goals.length === 0;
+  const showInlineLoader =
+    Boolean(userId) && loading && (tasks.length > 0 || goals.length > 0);
+
+  const onRefresh = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+    setRefreshing(true);
+    try {
+      await bootstrapTasks({ silent: true });
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userId, bootstrapTasks]);
+
+  const runToggle = useCallback(
+    async (task: Task) => {
+      if (!userId) {
+        return;
+      }
+      setPendingToggleIds((prev) => {
+        const next = new Set(prev);
+        next.add(task.id);
+        return next;
+      });
+      try {
+        await useTaskStore
+          .getState()
+          .toggleTask(task.id, userId, !task.completed);
+      } finally {
+        setPendingToggleIds((prev) => {
+          const next = new Set(prev);
+          next.delete(task.id);
+          return next;
+        });
+      }
     },
-    {
-      goalName: "Learning",
-      dotColor: "#F59E0B",
-      progress: "0/2 done",
-      tasks: [
-        {
-          id: "7",
-          title: "Read Zero to One ch.4",
-          subtitle: "Due 8pm",
-          priority: "Med" as const,
-          completed: false,
-        },
-        {
-          id: "8",
-          title: "Watch YC startup lecture",
-          subtitle: "Due 9pm",
-          priority: "Low" as const,
-          completed: false,
-        },
-      ],
+    [userId],
+  );
+
+  const confirmDelete = useCallback(
+    (task: Task) => {
+      if (!userId) {
+        return;
+      }
+      Alert.alert(
+        "Delete task",
+        `Remove "${task.title}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => {
+              void useTaskStore.getState().removeTask(task.id, userId);
+            },
+          },
+        ],
+        { cancelable: true },
+      );
     },
-  ];
+    [userId],
+  );
+
+  const handleAddSave = useCallback(
+    async (insert: TaskInsert) => {
+      await useTaskStore.getState().addTask(insert);
+    },
+    [],
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      {showBlockingLoader ? (
+        <View style={styles.blockingLoader}>
+          <ActivityIndicator size="large" color="#7C3AED" />
+        </View>
+      ) : null}
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => void onRefresh()}
+            tintColor="#7C3AED"
+            colors={["#7C3AED"]}
+          />
+        }
       >
-        {/* Header Row */}
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>My Tasks</Text>
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconButton}>
               <Ionicons name="search-outline" size={18} color="#444444" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => setAddVisible(true)}
+            >
               <Ionicons name="add" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Filter Pills */}
+        {showInlineLoader ? (
+          <View style={styles.inlineLoader}>
+            <ActivityIndicator size="small" color="#7C3AED" />
+          </View>
+        ) : null}
+
+        {error ? (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
         <FilterPills
-          options={filterOptions}
+          options={[...FILTER_OPTIONS]}
           active={activeFilter}
-          onSelect={setActiveFilter}
+          onSelect={(option) => {
+            if (
+              option === "Today" ||
+              option === "This Week" ||
+              option === "All" ||
+              option === "Done"
+            ) {
+              setActiveFilter(option);
+            }
+          }}
         />
 
-        {/* Goal Groups */}
-        {goalGroups.map((group) => (
+        {!userId ? (
+          <Text style={styles.emptyTitle}>Sign in to view tasks.</Text>
+        ) : null}
+
+        {userId && !loading && !error && goalSections.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyTitle}>No tasks here yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Tap + to add a task for this view.
+            </Text>
+          </View>
+        ) : null}
+
+        {goalSections.map((group) => (
           <GoalGroup
-            key={group.goalName}
+            key={group.goalId}
             goalName={group.goalName}
             dotColor={group.dotColor}
             progress={group.progress}
             tasks={group.tasks}
+            onToggleTask={(t) => void runToggle(t)}
+            onLongPressTask={confirmDelete}
+            pendingTaskIds={pendingToggleIds}
           />
         ))}
       </ScrollView>
 
-      {/* Floating Add Button */}
-      <TouchableOpacity style={styles.floatingButton}>
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setAddVisible(true)}
+      >
         <Ionicons name="add" size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      {userId ? (
+        <AddTaskSheet
+          visible={addVisible}
+          onClose={() => setAddVisible(false)}
+          userId={userId}
+          goals={goals}
+          onSave={handleAddSave}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -190,6 +342,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
+  },
+  blockingLoader: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(8,8,8,0.55)",
+    zIndex: 20,
+  },
+  inlineLoader: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  errorBanner: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: "#2A1515",
+    borderWidth: 1,
+    borderColor: "#EF4444",
+    marginBottom: 12,
+  },
+  errorText: {
+    color: "#FCA5A5",
+    fontSize: 13,
+    textAlign: "center",
+  },
+  emptyWrap: {
+    paddingVertical: 32,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: "#555555",
+    textAlign: "center",
+    marginTop: 8,
+    paddingHorizontal: 12,
   },
 });
 

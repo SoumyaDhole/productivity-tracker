@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { darkColors } from "../../../constants/colors";
 import HabitRow from "./HabitRow";
@@ -41,6 +41,10 @@ const HabitsCard: React.FC<HabitsCardProps> = ({
   onHabitToggle,
 }) => {
   const [localHabits, setLocalHabits] = useState(habits);
+
+  useEffect(() => {
+    setLocalHabits(habits);
+  }, [habits]);
 
   const handleToggle = (id: string) => {
     setLocalHabits((prev) =>

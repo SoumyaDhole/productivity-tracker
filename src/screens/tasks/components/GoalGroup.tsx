@@ -1,12 +1,15 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import TaskRow, { Task } from "./TaskRow";
+import TaskRow, { type Task } from "./TaskRow";
 
 interface GoalGroupProps {
   goalName: string;
   dotColor: string;
   progress: string;
   tasks: Task[];
+  onToggleTask?: (task: Task) => void;
+  onLongPressTask?: (task: Task) => void;
+  pendingTaskIds?: ReadonlySet<string>;
 }
 
 const GoalGroup: React.FC<GoalGroupProps> = ({
@@ -14,6 +17,9 @@ const GoalGroup: React.FC<GoalGroupProps> = ({
   dotColor,
   progress,
   tasks,
+  onToggleTask,
+  onLongPressTask,
+  pendingTaskIds,
 }) => {
   return (
     <View style={styles.groupCard}>
@@ -29,6 +35,9 @@ const GoalGroup: React.FC<GoalGroupProps> = ({
           key={task.id}
           task={task}
           isLast={index === tasks.length - 1}
+          onToggle={onToggleTask}
+          onLongPress={onLongPressTask}
+          disabled={pendingTaskIds?.has(task.id) ?? false}
         />
       ))}
     </View>

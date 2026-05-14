@@ -33,7 +33,14 @@ Your Supabase authentication is failing because the anon key format is incorrect
    node scripts/test-supabase.js
    ```
 
-5. **Restart your Expo app:**
+5. **Create the required database tables:**
+   - Open your Supabase project dashboard
+   - Go to SQL Editor
+   - Paste the contents of `scripts/supabase-schema.sql`
+   - Run the query
+   - Refresh the table list if necessary
+
+6. **Restart your Expo app:**
    ```bash
    npx expo start --clear
    ```

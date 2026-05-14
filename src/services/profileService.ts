@@ -14,8 +14,28 @@ export async function fetchProfile(userId: string): Promise<ProfileRow> {
   if (error) {
     throw toServiceError("fetchProfile", error);
   }
+
   if (!data) {
-    throw new ServiceError("fetchProfile: profile not found");
+    return createProfile(userId);
+  }
+
+  return data as ProfileRow;
+}
+
+export async function createProfile(userId: string): Promise<ProfileRow> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({ id: userId })
+    .select(
+      "id, username, full_name, avatar_url, level, xp, created_at",
+    )
+    .single();
+
+  if (error) {
+    throw toServiceError("createProfile", error);
+  }
+  if (!data) {
+    throw new ServiceError("createProfile: no row returned");
   }
   return data as ProfileRow;
 }
