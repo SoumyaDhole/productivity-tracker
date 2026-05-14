@@ -1,43 +1,72 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Button } from "../../components/ui/Button";
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { darkColors } from "../../constants/colors";
 import { useAuth } from "../../hooks/useAuth";
+import HabitsCard from "./components/HabitsCard";
+import HomeHeader from "./components/HomeHeader";
+import QuoteCard from "./components/QuoteCard";
+import StatsRow from "./components/StatsRow";
+import StreakCard from "./components/StreakCard";
+import TasksCard from "./components/TasksCard";
 
 const HomeScreen = () => {
-  const { signOut } = useAuth();
+  const { user } = useAuth();
 
-  const handleLogout = async () => {
-    await signOut();
-  };
+  // Extract display name from user email or use default
+  const displayName =
+    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Soumya";
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home Screen</Text>
-      <Text style={styles.body}>
-        Track your daily productivity and quick actions from here.
-      </Text>
-      <Button title="Logout" onPress={handleLogout} />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <HomeHeader name={displayName} />
+
+        {/* Streak Card */}
+        <StreakCard
+          currentStreak={12}
+          longestStreak={21}
+          thisWeek={5}
+          progress={70}
+        />
+
+        {/* Stats Row */}
+        <StatsRow />
+
+        {/* Tasks Card */}
+        <TasksCard />
+
+        {/* Habits Card */}
+        <HabitsCard />
+
+        {/* Quote Card */}
+        <QuoteCard />
+
+        {/* Bottom padding for tab bar */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
+    backgroundColor: darkColors.background,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 10,
+  scrollView: {
+    flex: 1,
+    backgroundColor: darkColors.background,
   },
-  body: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 20,
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  bottomPadding: {
+    height: 40,
   },
 });
 

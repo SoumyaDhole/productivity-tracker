@@ -1,33 +1,82 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import CircleHeatmap from "./components/CircleHeatmap";
+import HabitConsistency from "./components/HabitConsistency";
+import RecordsCard from "./components/RecordsCard";
+import SummaryStats from "./components/SummaryStats";
+import WeeklyBarChart from "./components/WeeklyBarChart";
 
-const AnalyticsScreen = () => {
+const AnalyticsScreen: React.FC = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Analytics Screen</Text>
-      <Text style={styles.body}>
-        View trends, progress charts, and productivity insights here.
-      </Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Row */}
+        <View style={styles.headerRow}>
+          <Text style={styles.headerTitle}>Analytics</Text>
+          <TouchableOpacity style={styles.selector}>
+            <Text style={styles.selectorText}>This Week ▾</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Summary Stats */}
+        <SummaryStats />
+
+        {/* Weekly Bar Chart */}
+        <WeeklyBarChart />
+
+        {/* Habit Consistency */}
+        <HabitConsistency />
+
+        {/* Circle Heatmap */}
+        <CircleHeatmap />
+
+        {/* Records Card */}
+        <RecordsCard />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#080808",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 24,
+    marginTop: 20,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
+  headerTitle: {
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 10,
+    color: "#FFFFFF",
   },
-  body: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+  selector: {
+    backgroundColor: "#111118",
+    borderRadius: 99,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  selectorText: {
+    fontSize: 12,
+    color: "#555555",
   },
 });
 
