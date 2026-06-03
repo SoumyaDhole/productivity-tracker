@@ -1,50 +1,114 @@
-# Welcome to your Expo app 👋
+# ProductivityTracker 🚀
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A full-stack gamified productivity tracker mobile app built with React Native, Expo, TypeScript, Zustand, and Supabase.
 
-## Get started
+ProductivityTracker helps users manage tasks, build habits, track goals, maintain streaks, earn XP, level up, and stay focused using Pomodoro-based focus sessions.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Features
 
-2. Start the app
+### 🔐 Authentication
+- User signup and login
+- Persistent sessions
+- Protected routes
+- First-time onboarding flow
 
-   ```bash
-   npx expo start
-   ```
+### ✅ Task Management
+- Add and complete tasks
+- Priority-based tasks
+- Due time support
+- Task filters
+- Goal-linked tasks
 
-In the output, you'll find options to open the app in a
+### 🎯 Goal Tracking
+- Create goals
+- Assign tasks to goals
+- Goal-based filtering
+- Organize productivity by category
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 🔁 Habit Tracking
+- Create daily habits
+- Habit completion tracking
+- Emoji and color customization
+- Habit streaks
+- Habit reminder support
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 🔥 Streak System
+- Daily activity streaks
+- Longest streak tracking
+- Streak rewards
+- Integrated with tasks and habits
 
-## Get a fresh project
+### ⭐ XP & Levels
+- Earn XP for completing actions
+- Level progression system
+- Gamified productivity experience
+- Profile progress tracking
 
-When you're ready, run:
+### ⏱ Focus / Pomodoro Mode
+- Focus timer
+- Short and long breaks
+- Pomodoro cycles
+- Task-linked focus sessions
+- Focus statistics
 
-```bash
-npm run reset-project
-```
+### 📊 Analytics Dashboard
+- Productivity score
+- Task insights
+- Habit insights
+- Focus insights
+- Weekly activity charts
+- Streak and consistency tracking
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 👤 Profile
+- XP progress
+- Current level
+- Badges
+- Streak stats
+- Settings section
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🛠 Tech Stack
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Frontend
+- React Native
+- Expo
+- Expo Router
+- TypeScript
 
-## Join the community
+### State Management
+- Zustand
 
-Join our community of developers creating universal apps.
+### Backend
+- Supabase
+- Supabase Auth
+- PostgreSQL
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Storage
+- AsyncStorage
+
+### UI
+- React Native StyleSheet
+- Ionicons
+- Custom dark theme
+
+---
+
+## 📁 Project Structure
+
+```text
+ProductivityTracker/
+├── app/
+│   ├── (tabs)/
+│   ├── auth/
+│   └── onboarding/
+├── src/
+│   ├── screens/
+│   ├── components/
+│   ├── services/
+│   ├── store/
+│   ├── utils/
+│   ├── constants/
+│   └── types/
